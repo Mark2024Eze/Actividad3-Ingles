@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0066cc;
+    }
+
+    #error-counter {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 10px;
+      color: #ff3333;
+      background-color: #ffe6e6;
+      border: 2px solid #ff4d4d;
+      border-radius: 10px;
+      display: inline-block;
+      padding: 10px 20px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #error-counter i {
+      font-size: 22px;
+    }
+
+    #reset-button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    #reset-button:hover {
+      background-color: #005bb5;
+    }
+
+    .categories {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .category {
+      width: 45%;
+      padding: 20px;
+      border: 2px dashed #0066cc;
+      min-height: 200px;
+      background-color: #e0f7fa;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .category h2 {
+      margin-bottom: 20px;
+    }
+
+    .word-container {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .word {
+      display: inline-block;
+      padding: 10px;
+      margin: 10px;
+      background-color: #b2ebf2;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .word.dragging {
+      opacity: 0.7;
+      transform: scale(1.2);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .word.incorrect {
+      background-color: #ff6666;
+    }
+  </style>
+  <title>Food and Drink Category Activity</title>
+</head>
+<body>
+  <h1>Drag the words to the correct category</h1>
+  <div id="error-counter"><i class="fas fa-exclamation-circle"></i> Errors: 0</div>
+
+  <button id="reset-button">Reset Activity</button>
+
+  <div class="categories">
+    <div class="category" id="food">
+      <h2>Food</h2>
+    </div>
+    <div class="category" id="drinks">
+      <h2>Drinks</h2>
+    </div>
+  </div>
+
+  <div class="word-container" id="word-container">
+    <div class="word" draggable="true" data-category="food">Apple</div>
+    <div class="word" draggable="true" data-category="food">Pizza</div>
+    <div class="word" draggable="true" data-category="food">Bread</div>
+    <div class="word" draggable="true" data-category="food">Cheese</div>
+    <div class="word" draggable="true" data-category="food">Cake</div>
+    <div class="word" draggable="true" data-category="drinks">Juice</div>
+    <div class="word" draggable="true" data-category="drinks">Water</div>
+    <div class="word" draggable="true" data-category="drinks">Tea</div>
+    <div class="word" draggable="true" data-category="drinks">Coffee</div>
+    <div class="word" draggable="true" data-category="drinks">Soda</div>
+  </div>
+
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script>
+    let errorCount = 0;
+    const errorCounterElement = document.getElementById('error-counter');
+    const words = document.querySelectorAll('.word');
+    const categories = document.querySelectorAll('.category');
+    const wordContainer = document.getElementById('word-container');
+    const resetButton = document.getElementById('reset-button');
+
+    words.forEach(word => {
+      word.addEventListener('dragstart', dragStart);
+      word.addEventListener('dragend', dragEnd);
+    });
+
+    categories.forEach(category => {
+      category.addEventListener('dragover', dragOver);
+      category.addEventListener('drop', drop);
+    });
+
+    resetButton.addEventListener('click', resetActivity);
+
+    function dragStart(e) {
+      e.dataTransfer.setData('text/plain', e.target.textContent);
+      e.target.classList.add('dragging');
+    }
+
+    function dragEnd(e) {
+      e.target.classList.remove('dragging');
+    }
+
+    function dragOver(e) {
+      e.preventDefault();
+    }
+
+    function drop(e) {
+      e.preventDefault();
+      const wordText = e.dataTransfer.getData('text/plain');
+      const draggedWord = Array.from(words).find(word => word.textContent === wordText);
+      const targetCategory = e.target.closest('.category').id;
+      
+      if (draggedWord.dataset.category === targetCategory) {
+        e.target.closest('.category').appendChild(draggedWord);
+      } else {
+        draggedWord.classList.add('incorrect');
+        errorCount++;
+        updateErrorCounter();
+        setTimeout(() => draggedWord.classList.remove('incorrect'), 1000);
+      }
+    }
+
+    function updateErrorCounter() {
+      errorCounterElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> Errors: ${errorCount}`;
+    }
+
+    function resetActivity() {
+      errorCount = 0;
+      updateErrorCounter();
+      
+      words.forEach(word => {
+        wordContainer.appendChild(word);
+      });
+    }
+  </script>
+</body>
+</html>
